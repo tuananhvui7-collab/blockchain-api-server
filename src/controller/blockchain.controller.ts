@@ -15,8 +15,7 @@ export class BlockchainController {
    */
   async getBalance(req: Request, res: Response): Promise<void> {
     try {
-      const address = req.params.address as string;
-      const assetId = req.params.assetId as string;
+      const { address, assetId } = req.params;
       const { currency = "usd" } = req.query;
 
       // Validate address
@@ -59,7 +58,7 @@ export class BlockchainController {
    */
   async getGas(req: Request, res: Response): Promise<void> {
     try {
-      const networkId = req.params.networkId as string;
+      const { networkId } = req.params;
       const { type = "eip1559" } = req.query;
 
       if (type !== "legacy" && type !== "eip1559") {
@@ -104,7 +103,7 @@ export class BlockchainController {
    */
   async getPrice(req: Request, res: Response): Promise<void> {
     try {
-      const assetId = req.params.assetId as string;
+      const { assetId } = req.params;
       const { currency = "usd" } = req.query;
 
       const result = await this.blockchainService.getPrice(
@@ -136,7 +135,7 @@ export class BlockchainController {
    */
   async getPriceHistory(req: Request, res: Response): Promise<void> {
     try {
-      const assetId = req.params.assetId as string;
+      const { assetId } = req.params;
       const { days = 7, currency = "usd" } = req.query;
 
       const result = await this.blockchainService.getPriceHistory(
@@ -169,8 +168,7 @@ export class BlockchainController {
    */
   async getHistory(req: Request, res: Response): Promise<void> {
     try {
-      const address = req.params.address as string;
-      const assetId = req.params.assetId as string;
+      const { address, assetId } = req.params;
       const { page = 1, limit = 50 } = req.query;
 
       // Validate address
@@ -218,8 +216,7 @@ export class BlockchainController {
    */
   async getNftOwners(req: Request, res: Response): Promise<void> {
     try {
-      const contractAddress = req.params.contractAddress as string;
-      const networkId = req.params.networkId as string;
+      const { contractAddress, networkId } = req.params;
       const { tokenId } = req.query;
 
       // Validate contract address
@@ -266,8 +263,7 @@ export class BlockchainController {
    */
   async getNftsForOwner(req: Request, res: Response): Promise<void> {
     try {
-      const owner = req.params.owner as string;
-      const networkId = req.params.networkId as string;
+      const { owner, networkId } = req.params;
       const { contractAddress } = req.query as { contractAddress?: string };
 
       if (networkId === "bitcoin") {
@@ -317,7 +313,7 @@ export class BlockchainController {
    */
   async getTokenMetadata(req: Request, res: Response): Promise<void> {
     try {
-      const assetId = req.params.assetId as string;
+      const { assetId } = req.params;
       const result = await this.blockchainService.getTokenMetadata(assetId);
 
       if (result.success) {
@@ -344,7 +340,7 @@ export class BlockchainController {
    */
   async getNftMetadata(req: Request, res: Response): Promise<void> {
     try {
-      const assetId = req.params.assetId as string;
+      const { assetId } = req.params;
       const result = await this.blockchainService.getNftMetadata(assetId);
 
       if (result.success) {

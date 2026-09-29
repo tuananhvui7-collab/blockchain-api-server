@@ -256,9 +256,9 @@ export class AlchemyProvider {
         hash: transfer.hash,
         from: transfer.from,
         to: transfer.to,
-        value: transfer.value?.toString() || "0",
+        value: transfer.rawContract?.value ? BigInt(transfer.rawContract.value).toString() : "0",
         valueFormatted: transfer.value
-          ? weiToEther(transfer.value.toString())
+          ? transfer.value.toString()
           : "0",
         timestamp: new Date(transfer.metadata?.blockTimestamp).getTime(),
         blockNumber: parseInt(transfer.blockNum, 16),
@@ -314,15 +314,12 @@ export class AlchemyProvider {
 
       // If tokenId provided -> use JSON-RPC alchemy_getOwnersForToken
       if (tokenId) {
-        const rpcUrl = `https://${alchemyNetwork}.g.alchemy.com/v2/${this.apiKey}`;
-        const rpcResponse = await axios.post(rpcUrl, {
-          jsonrpc: "2.0",
-          method: "alchemy_getOwnersForToken",
-          params: [contractAddress, tokenId],
-          id: 1,
+        const restUrl = `https://${alchemyNetwork}.g.alchemy.com/nft/v3/${this.apiKey}/getOwnersForNFT`;
+        const restResponse = await axios.get(restUrl, {
+          params: { contractAddress, tokenId },
         });
 
-        const owners: string[] = rpcResponse.data?.result?.owners || [];
+        const owners: string[] = restResponse.data?.owners || [];
 
         const nftOwners: NftOwner[] = owners.map((ownerAddress: string) => ({
           owner: ownerAddress,
@@ -551,32 +548,27 @@ export class AlchemyProvider {
         );
       }
 
-      const alchemyUrl = `https://${alchemyNetwork}.g.alchemy.com/v2/${this.apiKey}`;
-
-      const response = await axios.post(alchemyUrl, {
-        jsonrpc: "2.0",
-        method: "alchemy_getNFTMetadata",
-        params: [
-          {
-            contractAddress: assetInfo.contractAddress,
-            tokenId: assetInfo.tokenId,
-          },
-        ],
-        id: 1,
+      const restUrl = `https://${alchemyNetwork}.g.alchemy.com/nft/v3/${this.apiKey}/getNFTMetadata`;
+      const response = await axios.get(restUrl, {
+        params: {
+          contractAddress: assetInfo.contractAddress,
+          tokenId: assetInfo.tokenId,
+          tokenType: assetInfo.type.toUpperCase()
+        }
       });
 
-      const nftData = response.data.result;
+      const nftData = response.data;
 
       const metadata: NftMetadataResponse = {
-        name: nftData.name || "",
-        description: nftData.description || "",
-        image: nftData.image || "",
-        attributes: nftData.attributes || [],
+        name: nftData.name || nftData.raw?.metadata?.name || "",
+        description: nftData.description || nftData.raw?.metadata?.description || "",
+        image: nftData.image?.originalUrl || nftData.image?.cachedUrl || nftData.raw?.metadata?.image_url || "",
+        attributes: nftData.raw?.metadata?.traits || [],
         contractAddress: assetInfo.contractAddress,
         tokenId: assetInfo.tokenId,
         networkId: assetInfo.networkId,
         type: assetInfo.type,
-        tokenUri: nftData.tokenUri,
+        tokenUri: nftData.raw?.tokenUri || nftData.tokenUri || "",
       };
 
       return {

@@ -70,7 +70,9 @@ export function parseAssetId(assetId: string): AssetInfo {
  * Parse CAIP format assetId
  */
 function parseCAIPAssetId(assetId: string): AssetInfo {
-  const [chainPart, assetPart] = assetId.split("/");
+  const parts = assetId.split("/");
+  const chainPart = parts[0];
+  const assetPart = parts.slice(1).join("/");
 
   // Parse chain part (e.g., "eip155:1" or "bip122:000000000019d6689c085ae165831e93")
   const [chainNamespace, chainReference] = chainPart.split(":");
@@ -112,21 +114,20 @@ function parseCAIPAssetId(assetId: string): AssetInfo {
     contractAddress = assetReference;
   } else if (assetNamespace === "erc721") {
     type = "erc721";
-    // assetReference format: "0x...:123"
-    const parts = assetReference.split(":");
-    if (parts.length === 2) {
+    // assetReference format: "0x.../123" or "0x...:123"
+    const parts = assetReference.includes("/") ? assetReference.split("/") : assetReference.split(":");
+    if (parts.length >= 2) {
       contractAddress = parts[0];
-      tokenId = parts[1];
+      tokenId = parts.slice(1).join("/");
     } else {
       contractAddress = assetReference;
     }
   } else if (assetNamespace === "erc1155") {
     type = "erc1155";
-    // assetReference format: "0x...:123"
-    const parts = assetReference.split(":");
-    if (parts.length === 2) {
+    const parts = assetReference.includes("/") ? assetReference.split("/") : assetReference.split(":");
+    if (parts.length >= 2) {
       contractAddress = parts[0];
-      tokenId = parts[1];
+      tokenId = parts.slice(1).join("/");
     } else {
       contractAddress = assetReference;
     }
