@@ -342,8 +342,8 @@ export class AlchemyProvider {
         };
       }
 
-      // Else -> use REST v3 getOwnersForCollection
-      const restUrl = `https://${alchemyNetwork}.g.alchemy.com/nft/v3/${this.apiKey}/getOwnersForCollection`;
+      // Else -> use REST v3 getOwnersForContract
+      const restUrl = `https://${alchemyNetwork}.g.alchemy.com/nft/v3/${this.apiKey}/getOwnersForContract`;
       const restResponse = await axios.get(restUrl, {
         params: {
           contractAddress,
@@ -351,7 +351,7 @@ export class AlchemyProvider {
         },
       });
 
-      const ownerAddresses = restResponse.data?.ownerAddresses || [];
+      const ownerAddresses = restResponse.data?.owners || [];
       const nftOwners: NftOwner[] = [];
 
       for (const item of ownerAddresses) {
